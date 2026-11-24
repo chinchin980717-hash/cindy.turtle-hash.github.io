@@ -1,5 +1,5 @@
 const DATA_URL = new URL("./data/questions.json", import.meta.url);
-const ROUND_SECONDS = 10;
+const ROUND_SECONDS = 30;
 const MAX_HINTS = 3;
 const $ = (id) => document.getElementById(id);
 const screens = ["home-screen", "play-screen", "locked-screen", "reveal-screen", "end-screen", "error-screen"];
@@ -187,7 +187,7 @@ function lockAnswer(timedOut) {
   $("locked-quote").hidden = state.mode === "party" && hasNext;
   safeText($("locked-title"), timedOut && !raw ? "時間到，答案已鎖定。" : "答案已鎖定，先別急著翻面。");
   safeText($("locked-copy"), hasNext ? "答案先保留，請把裝置交給下一位玩家。" : "第一直覺已經記下來，現在一起看看大腦補上了什麼。");
-  safeText($("locked-next-note"), hasNext ? "下一位玩家有自己的 10 秒；前面鎖定的答案會暫時隱藏。" : `${state.players.length} 位玩家都已鎖定答案。`);
+  safeText($("locked-next-note"), hasNext ? "下一位玩家有自己的 30 秒；前面鎖定的答案會暫時隱藏。" : `${state.players.length} 位玩家都已鎖定答案。`);
   $("next-player-button").hidden = !hasNext;
   $("reveal-button").hidden = hasNext;
   showScreen("locked-screen");

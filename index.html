@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="盲點輪廓－翻面之前：10 秒認知反轉心理實驗遊戲">
+  <meta name="description" content="盲點輪廓－翻面之前：30 秒認知反轉心理實驗遊戲">
   <title>盲點輪廓－翻面之前</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
@@ -23,14 +23,14 @@
       <section id="home-screen" class="screen">
         <div class="home-layout">
           <figure class="cover-art">
-            <img src="./assets/cover.jpg" alt="盲點輪廓－翻面之前遊戲封面" width="864" height="1152" fetchpriority="high">
+            <img src="./assets/cover.webp" alt="盲點輪廓－翻面之前遊戲封面" width="864" height="1152" fetchpriority="high">
             <figcaption>START THE EXPERIMENT ／ 開始實驗</figcaption>
           </figure>
           <div class="home-copy">
             <p class="eyebrow">BLINDSPOT: BEFORE THE FLIP</p>
             <h1>盲點輪廓<br><span>翻面之前</span></h1>
             <p class="lead">只給你一句話，剩下的由大腦自動補完。<br>在直覺替你寫好劇本之前，先留下第一個答案。</p>
-            <div class="rule-strip"><span>10 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
+            <div class="rule-strip"><span>30 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
             <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
               <button class="mode-button selected" data-mode="solo" type="button"><b>單人自我測試</b><small>一個人挑戰第一直覺</small></button>
               <button class="mode-button" data-mode="party" type="button"><b>聚會輪流作答</b><small>2–6 人共用一台裝置</small></button>
@@ -53,7 +53,7 @@
         <div class="player-banner"><span id="active-player"></span><span id="turn-status" class="small-note"></span></div>
         <p class="section-label">盲點句 <span>／只看輪廓</span></p>
         <article id="blind-card" class="blind-card"><div class="card-face"><p id="blind-line"></p></div><div class="card-back"><p id="revealed-context"></p></div></article>
-        <div class="timer-row"><span>翻面倒數</span><strong id="timer-value">10</strong></div>
+        <div class="timer-row"><span>翻面倒數</span><strong id="timer-value">30</strong></div>
         <div class="timer-track"><span id="timer-bar"></span></div>
         <label class="answer-label" for="answer-input">你的第一直覺是？</label>
         <div class="answer-row"><input id="answer-input" maxlength="180" autocomplete="off" placeholder="輸入答案，或使用語音輸入…"><button id="voice-button" class="button button-quiet voice-button" type="button" aria-label="語音輸入" title="語音輸入">語音</button></div>
