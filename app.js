@@ -60,9 +60,11 @@ async function loadQuestions() {
     safeText($("question-count"), `目前題庫：${state.questions.length} 題`);
     safeText($("footer-question-count"), `${state.questions.length} 題可玩`);
     $("start-button").disabled = false;
+    $("enter-game-button").disabled = false;
   } catch (error) {
     console.error("[blindspot] 題庫讀取失敗", error);
     $("start-button").disabled = true;
+    $("enter-game-button").disabled = true;
     showScreen("error-screen");
   }
 }
@@ -80,8 +82,7 @@ function renderPlayerNames() {
 }
 function configureHome() {
   $("enter-game-button").addEventListener("click", () => {
-    showScreen("home-screen");
-    history.replaceState(null, "", "#home");
+    startGame();
   });
   $("home-link").addEventListener("click", (event) => {
     event.preventDefault();
