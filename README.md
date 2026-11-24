@@ -12,9 +12,14 @@
 
 直接打開上方 Pages 網址即可遊玩。首頁可選單人或聚會輪流模式，也能選擇本局題數與題目分類；聚會模式支援 2–6 人共用一台裝置。每回合可輸入答案、解鎖三層視角提示、鎖定作答，再翻面查看真相。判分提供 0／1／2 分輔助建議，玩家或主持人可手動調整。語音輸入依瀏覽器支援情況提供；不支援語音時仍可用文字作答。
 
+### 線上房間快速用法
+
+線上模式需要至少兩台能上網的裝置。房主選「線上房間實驗版」並按「建立房間」，取得 6 位房間代碼後分享給朋友；其他玩家選「加入房間」，輸入代碼並按「加入房間」。等所有人都顯示已連線後，房主再按「開始這局」。之後每個人在自己的裝置作答，房主負責翻面揭曉與進入下一題。完整的操作步驟、訊息格式與技術限制請見 [`docs/peerjs-online-architecture.md`](docs/peerjs-online-architecture.md)。
+
 ## 規格文件
 
 - `docs/gemini-gameplay-proposal.md`：使用者提供的 Gemini 核心玩法建議，作為待整合的設計提案；文件明列目前尚未實作的差異。
+- `docs/peerjs-online-architecture.md`：0.2.0 PeerJS 線上房間的使用方式、技術架構、訊息格式與限制。
 
 ## 專案結構
 
@@ -24,6 +29,7 @@
 - `assets/cover.webp`：首頁響應式遊戲封面；`assets/cover.jpg` 保留原始版本。
 - `data/questions.json`：題庫資料。
 - `docs/gemini-gameplay-proposal.md`：Gemini 核心玩法規格提案與歷史差異記錄。
+- `docs/peerjs-online-architecture.md`：PeerJS 線上房間實驗版的使用與技術說明。
 - `CHANGELOG.md`：逐版更新紀錄與驗收範圍。
 
 ## 本機預覽
