@@ -792,3 +792,39 @@ body::before {
     font-size: 34px;
   }
 }
+
+/* Use the supplied artwork as the only cover; do not recreate its title in HTML. */
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: min(100%, 520px);
+}
+
+.cover-art-large {
+  width: min(100%, 460px);
+  transform: none;
+  box-shadow: 0 24px 58px #0009, 0 0 0 7px #ffffff05, 0 0 42px var(--glow-accent);
+}
+
+.cover-page-actions {
+  width: min(100%, 460px);
+}
+
+@media (max-width: 620px) {
+  .cover-page {
+    width: min(100%, 430px);
+  }
+
+  .cover-art-large,
+  .cover-page-actions {
+    width: min(100%, 360px);
+  }
+}
+
+@media (max-width: 380px) {
+  .cover-art-large,
+  .cover-page-actions {
+    width: min(100%, 300px);
+  }
+}
