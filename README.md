@@ -1,6 +1,8 @@
 # 盲點輪廓－翻面之前
 
-**版本：0.1.3（HTML5／JavaScript 網頁版）**
+**實作版本：0.1.3（HTML5／JavaScript 網頁版）**
+
+**文件版次：0.1.4（新增 Gemini 設計提案；未改動遊戲程式）**
 
 GitHub Pages 遊玩網址：<https://chinchin980717-hash.github.io/cindy.turtle-hash.github.io/>
 
@@ -10,12 +12,17 @@ GitHub Pages 遊玩網址：<https://chinchin980717-hash.github.io/cindy.turtle-
 
 直接打開上方 Pages 網址即可遊玩。首頁可選單人或聚會輪流模式；聚會模式支援 2–6 人共用一台裝置。每回合可輸入答案、解鎖三層視角提示、鎖定作答，再翻面查看真相。判分提供 0／1／2 分輔助建議，玩家或主持人可手動調整。語音輸入依瀏覽器支援情況提供；不支援語音時仍可用文字作答。
 
+## 規格文件
+
+- `docs/gemini-gameplay-proposal.md`：使用者提供的 Gemini 核心玩法建議，作為待整合的設計提案；文件明列目前尚未實作的差異。
+
 ## 專案結構
 
 - `index.html`：Pages 首頁與遊戲畫面。
 - `app.js`：回合流程、倒數、提示、輪流作答、答案揭曉與判分。
 - `styles.css`：遊戲介面和窄螢幕版面。
 - `data/questions.json`：題庫資料。
+- `docs/gemini-gameplay-proposal.md`：待整合的 Gemini 核心玩法規格提案。
 - `CHANGELOG.md`：逐版更新紀錄與驗收範圍。
 
 ## 本機預覽
@@ -24,4 +31,4 @@ GitHub Pages 遊玩網址：<https://chinchin980717-hash.github.io/cindy.turtle-
 
 ## 目前範圍與限制
 
-題庫目前只有 3 題（001、002、011）。聚會模式是同一裝置輪流，不含線上多人或搶答。關鍵詞只提供判分輔助；替代解釋由玩家或主持人確認。語音輸入是否可用取決於瀏覽器。
+題庫目前只有 3 題（001、002、011）。聚會模式是同一裝置輪流，不含線上多人或搶答。關鍵詞只提供判分輔助；替代解釋由玩家或主持人確認。語音輸入是否可用取決於瀏覽器。Gemini 建議中的搶答模式與三層級題庫提示規格尚待整合，詳見規格提案。

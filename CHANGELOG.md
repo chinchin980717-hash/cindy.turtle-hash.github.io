@@ -1,5 +1,16 @@
 # 更新紀錄
 
+## 0.1.4 — 2026-11-24
+
+### 規格文件
+- 新增 `docs/gemini-gameplay-proposal.md`，保存使用者提供的 Gemini 核心玩法建議，供後續實作與交接參考。
+- README 增加規格文件索引並更新版本標記。
+- 本版更新規格文件與 Pages 發布流程，沒有宣稱或實作搶答模式，也沒有擴充題庫或題目提示內容。
+
+### GitHub Pages 部署
+- 將靜態檔案準備／artifact 上傳與 Pages 部署拆成前後相依的兩個 jobs，避免部署 job 在 artifact 尚不可見時查無 artifact。
+- 本次線上部署及遊玩驗收仍待 workflow 成功後確認。
+
 ## 0.1.3 — 2026-11-23
 
 ### HTML5／JavaScript 網頁版
