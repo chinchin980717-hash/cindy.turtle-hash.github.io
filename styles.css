@@ -807,8 +807,28 @@ body::before {
   box-shadow: 0 24px 58px #0009, 0 0 0 7px #ffffff05, 0 0 42px var(--glow-accent);
 }
 
-.cover-page-actions {
-  width: min(100%, 460px);
+.cover-image-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cover-image-button:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
+.cover-image-button:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 4px;
+}
+
+.cover-image-button:not(:disabled):hover img {
+  filter: brightness(1.06);
 }
 
 @media (max-width: 620px) {
@@ -816,15 +836,13 @@ body::before {
     width: min(100%, 430px);
   }
 
-  .cover-art-large,
-  .cover-page-actions {
+  .cover-art-large {
     width: min(100%, 360px);
   }
 }
 
 @media (max-width: 380px) {
-  .cover-art-large,
-  .cover-page-actions {
+  .cover-art-large {
     width: min(100%, 300px);
   }
 }
