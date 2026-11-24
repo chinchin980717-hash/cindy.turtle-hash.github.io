@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1320">
+  <meta name="description" content="盲點輪廓－翻面之前：10 秒認知反轉心理實驗遊戲">
+  <title>盲點輪廓－翻面之前</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="wordmark" href="#home" aria-label="返回首頁"><span class="brand-mark">B/F</span><span>認知反轉實驗室</span></a>
+      <span class="edition">盲點輪廓　／　翻面之前</span>
+    </header>
+
+    <main id="app" class="main-card" aria-live="polite">
+      <section id="home-screen" class="screen">
+        <p class="eyebrow">BLINDSPOT: BEFORE THE FLIP</p>
+        <h1>盲點輪廓<br><span>翻面之前</span></h1>
+        <p class="lead">只給你一句話，剩下的由大腦自動補完。<br>在直覺替你寫好劇本之前，先留下第一個答案。</p>
+        <div class="rule-strip"><span>10 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
+        <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
+          <button class="mode-button selected" data-mode="solo" type="button"><b>單人自我測試</b><small>一個人挑戰第一直覺</small></button>
+          <button class="mode-button" data-mode="party" type="button"><b>聚會輪流作答</b><small>2–6 人共用一台裝置</small></button>
+        </div>
+        <div id="party-setup" class="party-setup" hidden>
+          <label for="player-count">玩家人數</label>
+          <select id="player-count" aria-label="玩家人數"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+          <div id="player-names" class="player-names"></div>
+          <p class="helper">每位玩家輪流作答；答案會在大家都鎖定後一起揭曉。</p>
+        </div>
+        <button id="start-button" class="button button-primary button-wide" type="button">開始第一題 <span aria-hidden="true">→</span></button>
+        <p id="question-count" class="small-note">正在讀取題庫…</p>
+      </section>
+
+      <section id="play-screen" class="screen" hidden>
+        <div class="topline"><span class="eyebrow">B / F　盲點輪廓</span><span id="question-meta" class="small-note"></span></div>
+        <div class="progress-track"><span id="round-progress"></span></div>
+        <div class="player-banner"><span id="active-player"></span><span id="turn-status" class="small-note"></span></div>
+        <p class="section-label">盲點句 <span>／只看輪廓</span></p>
+        <article id="blind-card" class="blind-card"><div class="card-face"><p id="blind-line"></p></div><div class="card-back"><p id="revealed-context"></p></div></article>
+        <div class="timer-row"><span>翻面倒數</span><strong id="timer-value">10</strong></div>
+        <div class="timer-track"><span id="timer-bar"></span></div>
+        <label class="answer-label" for="answer-input">你的第一直覺是？</label>
+        <div class="answer-row"><input id="answer-input" maxlength="180" autocomplete="off" placeholder="輸入答案，或使用語音輸入…"><button id="voice-button" class="button button-quiet voice-button" type="button" aria-label="語音輸入" title="語音輸入">語音</button></div>
+        <p id="voice-status" class="helper" aria-live="polite"></p>
+        <div class="hint-area"><div class="hint-heading"><span>視角提示</span><span id="hint-count" class="small-note">0 / 3 已解鎖</span></div><div id="hint-list" class="hint-list"></div><button id="hint-button" class="button button-quiet" type="button">解鎖提示 L1</button></div>
+        <div class="action-row"><button id="lock-button" class="button button-primary" type="button">鎖定答案 <span aria-hidden="true">→</span></button><button id="skip-button" class="button button-quiet" type="button">略過本題</button></div>
+      </section>
+
+      <section id="locked-screen" class="screen" hidden>
+        <p class="eyebrow">答案已鎖定</p>
+        <h2 id="locked-title">先別急著翻面。</h2>
+        <p id="locked-copy" class="lead"></p>
+        <div id="locked-quote" class="locked-quote"><span id="locked-player"></span><blockquote id="locked-answer"></blockquote></div>
+        <p id="locked-next-note" class="helper"></p>
+        <button id="next-player-button" class="button button-primary button-wide" type="button">交給下一位 <span aria-hidden="true">→</span></button>
+        <button id="reveal-button" class="button button-primary button-wide" type="button" hidden>翻面揭曉 <span aria-hidden="true">→</span></button>
+      </section>
+
+      <section id="reveal-screen" class="screen" hidden>
+        <div class="topline"><span class="eyebrow">翻面揭曉</span><span id="reveal-meta" class="small-note"></span></div>
+        <div class="reveal-card"><p class="section-label">全貌真相</p><p id="full-context" class="context-copy"></p></div>
+        <div class="insight-box"><span class="section-label">盲點解析</span><p id="insight-copy"></p></div>
+        <p class="section-label score-heading">直覺判定 <span>／可由玩家或主持人調整</span></p>
+        <div id="score-results" class="score-results"></div>
+        <div class="score-key"><span><b>+2</b> 看穿盲點</span><span><b>+1</b> 跳出刻板印象</span><span><b>0</b> 掉進預設劇本</span></div>
+        <button id="continue-button" class="button button-primary button-wide" type="button">下一題 <span aria-hidden="true">→</span></button>
+      </section>
+
+      <section id="end-screen" class="screen" hidden>
+        <p class="eyebrow">實驗完成</p><h2>你看見了自己的<br><span>第一直覺。</span></h2>
+        <p id="final-summary" class="lead"></p>
+        <div id="final-scores" class="final-scores"></div>
+        <button id="restart-button" class="button button-primary button-wide" type="button">再玩一次 <span aria-hidden="true">↻</span></button>
+      </section>
+
+      <section id="error-screen" class="screen" hidden>
+        <p class="eyebrow">題庫讀取失敗</p><h2>無法載入遊戲題目</h2><p class="lead">請透過本機 HTTP 伺服器開啟此頁面，不要直接以 file:// 開啟。確認專案的 data/questions.json 存在後重新整理。</p>
+      </section>
+    </main>
+    <footer><span>第一直覺不是答案，只是大腦寫好的第一個故事。</span><span id="footer-question-count"></span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
