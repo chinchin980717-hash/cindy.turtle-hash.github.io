@@ -10,6 +10,7 @@
   <meta name="description" content="盲點輪廓－翻面之前：30 秒認知反轉心理實驗遊戲">
   <title>盲點輪廓－翻面之前</title>
   <link rel="stylesheet" href="./styles.css">
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script type="module" src="./app.js"></script>
 </head>
 <body>
@@ -40,6 +41,15 @@
             <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
               <button class="mode-button selected" data-mode="solo" type="button"><b>單人自我測試</b><small>一個人挑戰第一直覺</small></button>
               <button class="mode-button" data-mode="party" type="button"><b>聚會輪流作答</b><small>2–6 人共用一台裝置</small></button>
+              <button class="mode-button" data-mode="online" type="button"><b>線上房間實驗版</b><small>各自手機連線同樂</small></button>
+            </div>
+            <div id="online-setup" class="online-setup" hidden>
+              <div class="online-fields">
+                <label class="setting-field" for="online-name"><span>你的暱稱</span><input id="online-name" maxlength="18" value="玩家" autocomplete="nickname"></label>
+                <label class="setting-field" for="online-role"><span>線上角色</span><select id="online-role"><option value="host">建立房間</option><option value="guest">加入房間</option></select></label>
+              </div>
+              <label id="room-code-field" class="setting-field" for="room-code" hidden><span>房間代碼</span><input id="room-code" maxlength="6" inputmode="text" autocapitalize="characters" placeholder="輸入房主提供的代碼"></label>
+              <p id="online-status" class="helper" aria-live="polite">實驗版：需要兩台裝置都能連上 PeerJS Cloud。</p>
             </div>
             <div class="game-settings" aria-label="遊戲設定">
               <label class="setting-field" for="round-count"><span>遊戲局數</span><select id="round-count"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option><option value="all">全部題目</option></select></label>

@@ -7,7 +7,8 @@ const screens = ["cover-screen", "home-screen", "play-screen", "locked-screen", 
 const state = {
   questions: [], playlist: [], mode: "solo", players: [], questionIndex: 0,
   playerIndex: 0, answers: [], hintIndex: 0, timer: null,
-  seconds: ROUND_SECONDS, startedAt: 0, answering: false
+  seconds: ROUND_SECONDS, startedAt: 0, answering: false,
+  online: { peer: null, connection: null, connections: new Map(), role: null, code: "", name: "", ready: false, players: [], answers: new Map(), round: 0, total: 0 }
 };
 
 const defaultL3 = "試著比較兩種相反情境：最符合表面直覺的是什麼？若把動機完全反過來，哪個合理情況也符合句中明確事實？";
@@ -49,6 +50,183 @@ function notify(message) {
   notify.timeout = setTimeout(() => toast.classList.remove("visible"), 2200);
 }
 function escapeText(value) { return String(value ?? ""); }
+
+function onlineStatus(message) { safeText($("online-status"), message); }
+function onlineName() { return $("online-name").value.trim().slice(0, 18) || "玩家"; }
+function makeRoomCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
+function onlinePlayers() {
+  const scores = new Map(state.players.map((player) => [player.id, player.score || 0]));
+  return [{ id: "host", name: state.online.role === "host" ? state.online.name : "房主", score: scores.get("host") || 0 }, ...[...state.online.connections.values()].map((connection) => ({ id: connection.peer, name: connection.playerName || "玩家", score: scores.get(connection.peer) || 0 }))];
+}
+function sendOnline(message) {
+  if (state.online.role === "host") [...state.online.connections.values()].forEach((connection) => { if (connection.open) connection.send(message); });
+  else if (state.online.connection?.open) state.online.connection.send(message);
+}
+function resetOnline() {
+  state.online.connections.forEach((connection) => connection.close());
+  state.online.connection?.close();
+  state.online.peer?.destroy();
+  state.online = { peer: null, connection: null, connections: new Map(), role: null, code: "", name: "", ready: false, players: [], answers: new Map(), round: 0, total: 0 };
+}
+function setupOnlineHost() {
+  if (!window.Peer) { onlineStatus("PeerJS 載入失敗，請改用單人或同裝置模式。"); return; }
+  if (state.online.ready && state.online.role === "host") { startOnlineGame(); return; }
+  resetOnline();
+  state.online.role = "host";
+  state.online.name = onlineName();
+  state.online.code = makeRoomCode();
+  onlineStatus("正在建立房間…");
+  const peer = new window.Peer(`bf-${state.online.code.toLowerCase()}`);
+  state.online.peer = peer;
+  peer.on("open", () => {
+    state.online.ready = true;
+    $("start-button").textContent = "開始這局 →";
+    onlineStatus(`房間已建立，代碼：${state.online.code}。把代碼給朋友，再按「開始這局」。`);
+  });
+  peer.on("connection", (connection) => {
+    connection.on("open", () => {
+      connection.playerName = "玩家";
+      state.online.connections.set(connection.peer, connection);
+      connection.send({ type: "lobby", players: onlinePlayers() });
+      onlineStatus(`房間 ${state.online.code} 已連線 ${state.online.connections.size} 位玩家。`);
+    });
+    connection.on("data", (message) => handleOnlineMessage(message, connection));
+    connection.on("close", () => { state.online.connections.delete(connection.peer); onlineStatus(`房間 ${state.online.code}：目前 ${state.online.connections.size} 位玩家連線。`); });
+  });
+  peer.on("error", (error) => onlineStatus(`房間連線失敗：${error.type || "未知錯誤"}。請重新建立房間。`));
+}
+function setupOnlineGuest() {
+  if (!window.Peer) { onlineStatus("PeerJS 載入失敗，請改用單人或同裝置模式。"); return; }
+  const code = $("room-code").value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{6}$/.test(code)) { onlineStatus("請輸入 6 位房間代碼。"); return; }
+  resetOnline();
+  state.online.role = "guest";
+  state.online.name = onlineName();
+  state.online.code = code;
+  onlineStatus("正在連線房間…");
+  const peer = new window.Peer();
+  state.online.peer = peer;
+  peer.on("open", () => {
+    const connection = peer.connect(`bf-${code.toLowerCase()}`, { reliable: true });
+    state.online.connection = connection;
+    connection.on("open", () => { connection.send({ type: "join", name: state.online.name }); onlineStatus("已連上房間，等待房主開始遊戲…"); });
+    connection.on("data", (message) => handleOnlineMessage(message, connection));
+    connection.on("close", () => onlineStatus("與房間的連線已中斷。"));
+    connection.on("error", () => onlineStatus("加入房間失敗，請確認代碼後重試。"));
+  });
+  peer.on("error", (error) => onlineStatus(`加入房間失敗：${error.type || "未知錯誤"}。`));
+}
+function startOnlineGame() {
+  buildPlaylist();
+  if (!state.playlist.length) { onlineStatus("這個分類目前沒有可玩的題目。"); return; }
+  state.online.players = onlinePlayers();
+  state.players = state.online.players;
+  state.questionIndex = 0;
+  state.online.total = state.playlist.length;
+  startOnlineRound();
+}
+function startOnlineRound() {
+  if (state.questionIndex >= state.playlist.length) {
+    sendOnline({ type: "end" });
+    showEnd();
+    return;
+  }
+  state.online.round = state.questionIndex + 1;
+  state.online.answers = new Map();
+  state.answers = [];
+  state.online.players = onlinePlayers();
+  state.players = state.online.players;
+  const question = state.playlist[state.questionIndex];
+  sendOnline({ type: "question", question, round: state.online.round, total: state.online.total, players: state.players });
+  showTurn();
+}
+function handleOnlineJoin(message, connection) {
+  connection.playerName = String(message.name || "玩家").slice(0, 18);
+  state.online.connections.set(connection.peer, connection);
+  state.online.players = onlinePlayers();
+  state.players = state.online.players;
+  connection.send({ type: "lobby", players: state.players });
+  onlineStatus(`房間 ${state.online.code} 已連線 ${state.online.connections.size} 位玩家。`);
+}
+function recordOnlineAnswer(playerId, raw, timedOut = false, skipped = false) {
+  const playerIndex = state.players.findIndex((player) => player.id === playerId);
+  if (playerIndex < 0 || state.online.answers.has(playerId)) return;
+  const result = scoreAnswer(currentQuestion(), raw);
+  const answer = skipped ? "（略過本題）" : (timedOut && !raw ? "（時間到，未作答）" : (raw || "（未作答）"));
+  state.online.answers.set(playerId, { playerIndex, playerId, answer, score: result.score, appliedScore: 0, reason: skipped ? "本題略過，不列入直覺判定。" : result.reason, hits: result.hits, timedOut: Boolean(timedOut && !raw), skipped });
+  state.answers = [...state.online.answers.values()];
+}
+function maybeEnableOnlineReveal() {
+  if (state.online.role !== "host") return;
+  const ready = state.players.length > 0 && state.players.every((player) => state.online.answers.has(player.id));
+  $("reveal-button").hidden = !ready;
+  safeText($("locked-title"), ready ? "所有玩家已作答。" : "等待其他玩家作答…");
+  safeText($("locked-copy"), ready ? "房主可以翻面揭曉，看看大家的第一直覺。" : `目前 ${state.online.answers.size} / ${state.players.length} 位玩家已完成。`);
+}
+function submitOnlineAnswer(timedOut = false, skipped = false) {
+  if ($("play-screen").hidden || $("answer-input").disabled) return;
+  clearInterval(state.timer);
+  const raw = $("answer-input").value.trim();
+  const playerId = state.online.role === "host" ? "host" : state.online.peer.id;
+  if (state.online.role === "host") {
+    recordOnlineAnswer(playerId, raw, timedOut, skipped);
+    maybeEnableOnlineReveal();
+  } else {
+    state.online.connection?.send({ type: "answer", answer: raw, timedOut, skipped });
+    safeText($("locked-title"), skipped ? "本題已略過，等待房主揭曉。" : "答案已送出，等待房主揭曉…");
+    safeText($("locked-copy"), "房主完成翻面後，大家會一起看到真相與分數。");
+  }
+  const answer = skipped ? "（略過本題）" : (timedOut && !raw ? "（時間到，未作答）" : (raw || "（未作答）"));
+  $("answer-input").disabled = true;
+  $("lock-button").disabled = true;
+  $("skip-button").disabled = true;
+  $("locked-player").textContent = state.online.name;
+  $("locked-answer").textContent = answer;
+  $("locked-quote").hidden = true;
+  $("next-player-button").hidden = true;
+  if (state.online.role !== "host") $("reveal-button").hidden = true;
+  showScreen("locked-screen");
+}
+function handleOnlineMessage(message, connection) {
+  if (!message?.type) return;
+  if (state.online.role === "host" && message.type === "join") { handleOnlineJoin(message, connection); return; }
+  if (state.online.role === "host" && message.type === "answer") {
+    recordOnlineAnswer(connection.peer, String(message.answer || ""), Boolean(message.timedOut), Boolean(message.skipped));
+    maybeEnableOnlineReveal();
+    return;
+  }
+  if (message.type === "lobby") {
+    state.online.players = message.players || [];
+    onlineStatus(`已連線房間 ${state.online.code}，目前 ${state.online.players.length} 位玩家。等待房主開始…`);
+    return;
+  }
+  if (message.type === "question") {
+    state.online.players = message.players || [];
+    state.players = state.online.players;
+    state.playlist = [message.question];
+    state.questionIndex = 0;
+    state.online.round = message.round;
+    state.online.total = message.total;
+    showTurn();
+    return;
+  }
+  if (message.type === "reveal") {
+    state.online.players = message.players || state.online.players;
+    state.players = state.online.players;
+    state.playlist = [message.question];
+    state.questionIndex = 0;
+    state.answers = message.answers || [];
+    renderScores();
+    safeText($("full-context"), message.question.full_context);
+    safeText($("insight-copy"), message.question.insight);
+    safeText($("reveal-meta"), `${message.question.id ?? ""}　／　${message.question.category ?? ""}`);
+    safeText($("revealed-context"), message.question.full_context);
+    $("continue-button").hidden = true;
+    showScreen("reveal-screen");
+    return;
+  }
+  if (message.type === "end") { showEnd(); }
+}
 
 async function loadQuestions() {
   try {
@@ -118,10 +296,17 @@ function configureHome() {
     state.mode = button.dataset.mode;
     document.querySelectorAll(".mode-button").forEach((candidate) => candidate.classList.toggle("selected", candidate === button));
     $("party-setup").hidden = state.mode !== "party";
+    $("online-setup").hidden = state.mode !== "online";
+    $("start-button").textContent = state.mode === "online" ? "建立／加入房間 →" : "開始玩 →";
   }));
   $("player-count").addEventListener("change", renderPlayerNames);
   $("round-count").addEventListener("change", updateGameSettingsNote);
   $("category-select").addEventListener("change", updateGameSettingsNote);
+  $("online-role").addEventListener("change", () => {
+    $("room-code-field").hidden = $("online-role").value !== "guest";
+    onlineStatus($("online-role").value === "guest" ? "輸入房主提供的 6 位代碼。" : "建立房間後把代碼分享給朋友。");
+    $("start-button").textContent = $("online-role").value === "guest" ? "加入房間 →" : "建立房間 →";
+  });
   renderPlayerNames();
   $("start-button").addEventListener("click", startGame);
   $("lock-button").addEventListener("click", () => lockAnswer(false));
@@ -138,6 +323,10 @@ function configureHome() {
 }
 
 function startGame() {
+  if (state.mode === "online") {
+    if ($("online-role").value === "guest") setupOnlineGuest(); else setupOnlineHost();
+    return;
+  }
   clearInterval(state.timer);
   buildPlaylist();
   if (!state.playlist.length) { notify("這個分類目前沒有可玩的題目。"); return; }
@@ -160,7 +349,9 @@ function showTurn() {
   state.seconds = ROUND_SECONDS;
   safeText($("question-meta"), `${q.id ?? String(state.questionIndex + 1).padStart(3, "0")}　／　${q.category ?? "未分類"}`);
   safeText($("round-progress"), "");
-  $("round-progress").style.width = `${((state.questionIndex + 1) / state.playlist.length) * 100}%`;
+  const totalRounds = state.mode === "online" ? state.online.total : state.playlist.length;
+  const currentRound = state.mode === "online" ? state.online.round : state.questionIndex + 1;
+  $("round-progress").style.width = `${(currentRound / totalRounds) * 100}%`;
   safeText($("blind-line"), q.blind_spot_line);
   safeText($("revealed-context"), "準備翻面揭曉…");
   $("blind-card").classList.remove("flipped");
@@ -217,6 +408,7 @@ function unlockHint() {
   } else $("hint-button").textContent = `解鎖提示 L${state.hintIndex + 1}`;
 }
 function lockAnswer(timedOut, skipped = false) {
+  if (state.mode === "online") { submitOnlineAnswer(timedOut, skipped); return; }
   if ($("play-screen").hidden || $("answer-input").disabled) return;
   clearInterval(state.timer);
   const raw = $("answer-input").value.trim();
@@ -256,6 +448,15 @@ function scoreAnswer(question, answer) {
   return { score: 1, reason: "避開已知誤導方向；這是輔助判分，請依答案是否合理替代解釋調整。", hits: [] };
 }
 function revealQuestion() {
+  if (state.mode === "online") {
+    if (state.online.role !== "host") { notify("請等待房主翻面揭曉。"); return; }
+    if (state.online.answers.size < state.players.length) { notify("還有玩家尚未作答。"); return; }
+    state.answers = [...state.online.answers.values()];
+    const q = currentQuestion();
+    renderScores();
+    sendOnline({ type: "reveal", question: q, players: state.players, answers: state.answers });
+    return;
+  }
   const q = currentQuestion();
   safeText($("full-context"), q.full_context);
   safeText($("insight-copy"), q.insight);
@@ -308,8 +509,16 @@ function renderScores() {
     result.appliedScore = result.score;
   });
   safeText($("continue-button"), state.questionIndex === state.playlist.length - 1 ? "查看總結 →" : "下一題 →");
+  if (state.mode === "online") $("continue-button").hidden = state.online.role !== "host";
 }
 function nextQuestion() {
+  if (state.mode === "online") {
+    if (state.online.role !== "host") { notify("請等待房主進入下一題。"); return; }
+    $("continue-button").hidden = false;
+    state.questionIndex += 1;
+    startOnlineRound();
+    return;
+  }
   state.questionIndex += 1;
   showTurn();
 }
