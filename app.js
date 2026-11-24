@@ -125,7 +125,7 @@ function configureHome() {
   renderPlayerNames();
   $("start-button").addEventListener("click", startGame);
   $("lock-button").addEventListener("click", () => lockAnswer(false));
-  $("skip-button").addEventListener("click", () => { $("answer-input").value = ""; lockAnswer(true); });
+  $("skip-button").addEventListener("click", () => { $("answer-input").value = ""; lockAnswer(false, true); });
   $("hint-button").addEventListener("click", unlockHint);
   $("next-player-button").addEventListener("click", nextPlayer);
   $("reveal-button").addEventListener("click", revealQuestion);
@@ -216,13 +216,14 @@ function unlockHint() {
     $("hint-button").textContent = "提示已全部解鎖";
   } else $("hint-button").textContent = `解鎖提示 L${state.hintIndex + 1}`;
 }
-function lockAnswer(timedOut) {
+function lockAnswer(timedOut, skipped = false) {
   if ($("play-screen").hidden || $("answer-input").disabled) return;
   clearInterval(state.timer);
   const raw = $("answer-input").value.trim();
-  const answer = timedOut && !raw ? "（時間到，未作答）" : (raw || "（未作答）");
+  const answer = skipped ? "（略過本題）" : (timedOut && !raw ? "（時間到，未作答）" : (raw || "（未作答）"));
   const result = scoreAnswer(currentQuestion(), raw);
-  state.answers.push({ playerIndex: state.playerIndex, answer, score: result.score, appliedScore: 0, reason: result.reason, hits: result.hits, timedOut: Boolean(timedOut && !raw) });
+  const reason = skipped ? "本題略過，不列入直覺判定。" : result.reason;
+  state.answers.push({ playerIndex: state.playerIndex, answer, score: result.score, appliedScore: 0, reason, hits: result.hits, timedOut: Boolean(timedOut && !raw), skipped });
   $("answer-input").disabled = true;
   $("lock-button").disabled = true;
   $("skip-button").disabled = true;
@@ -230,8 +231,8 @@ function lockAnswer(timedOut) {
   $("locked-answer").textContent = answer;
   const hasNext = state.playerIndex + 1 < state.players.length;
   $("locked-quote").hidden = state.mode === "party" && hasNext;
-  safeText($("locked-title"), timedOut && !raw ? "時間到，答案已鎖定。" : "答案已鎖定，先別急著翻面。");
-  safeText($("locked-copy"), hasNext ? "答案先保留，請把裝置交給下一位玩家。" : "第一直覺已經記下來，現在一起看看大腦補上了什麼。");
+  safeText($("locked-title"), skipped ? "本題已略過。" : (timedOut && !raw ? "時間到，答案已鎖定。" : "答案已鎖定，先別急著翻面。"));
+  safeText($("locked-copy"), skipped ? "這題不計入直覺判定，準備繼續下一題。" : (hasNext ? "答案先保留，請把裝置交給下一位玩家。" : "第一直覺已經記下來，現在一起看看大腦補上了什麼。"));
   safeText($("locked-next-note"), hasNext ? "下一位玩家有自己的 30 秒；前面鎖定的答案會暫時隱藏。" : `${state.players.length} 位玩家都已鎖定答案。`);
   $("next-player-button").hidden = !hasNext;
   $("reveal-button").hidden = hasNext;
