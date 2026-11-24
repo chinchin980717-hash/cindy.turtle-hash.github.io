@@ -4,12 +4,13 @@
 
 ### 規格文件
 - 新增 `docs/gemini-gameplay-proposal.md`，保存使用者提供的 Gemini 核心玩法建議，供後續實作與交接參考。
-- README 增加規格文件索引並更新版本標記。
+- README 增加規格文件索引、更新版本標記，並以「盲點輪廓」作為遊玩連結顯示文字。
 - 本版更新規格文件與 Pages 發布流程，沒有宣稱或實作搶答模式，也沒有擴充題庫或題目提示內容。
 
 ### GitHub Pages 部署
 - 將靜態檔案準備／artifact 上傳與 Pages 部署拆成前後相依的兩個 jobs，避免部署 job 在 artifact 尚不可見時查無 artifact。
-- 本次線上部署及遊玩驗收仍待 workflow 成功後確認。
+- GitHub Pages workflow run `45353621701` 部署成功；首頁、`app.js`、`data/questions.json` 均實測 HTTP 200。
+- 公開頁面實測倒數到時鎖定、L1–L3 提示解鎖、輸入／鎖定／翻面及核心答案 +2 分；雙人輪流時第一位答案於第二位作答前隱藏，翻面後 +2／0 分判定正確。
 
 ## 0.1.3 — 2026-11-23
 

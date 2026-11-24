@@ -4,7 +4,7 @@
 
 **文件版次：0.1.4（新增 Gemini 設計提案；未改動遊戲程式）**
 
-GitHub Pages 遊玩網址：<https://chinchin980717-hash.github.io/cindy.turtle-hash.github.io/>
+直接遊玩：[盲點輪廓](https://chinchin980717-hash.github.io/cindy.turtle-hash.github.io/)
 
 一款純文字、快節奏的認知反轉小遊戲。玩家先看盲點句，在 10 秒內留下第一直覺，再翻面閱讀完整情境與盲點解析。
 
