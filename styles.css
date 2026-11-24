@@ -1113,6 +1113,23 @@ body:not(.cover-mode) {
   border-radius: 12px;
   background: #c69a5b08;
 }
+.game-type-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 15px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.game-type-note b {
+  padding: 4px 7px;
+  border: 1px solid #c69a5b55;
+  border-radius: 5px;
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 500;
+}
+.game-type-note span { letter-spacing: .03em; }
 .how-to-play summary {
   display: flex;
   align-items: center;
@@ -1149,6 +1166,41 @@ body:not(.cover-mode) {
   padding: 11px 12px;
   border-left: 2px solid var(--accent);
   background: #f1b65f0b;
+}
+.faq-block {
+  display: grid;
+  gap: 6px;
+  margin-top: 2px;
+  padding-top: 11px;
+  border-top: 1px solid #ffffff0d;
+}
+.faq-title {
+  margin: 0 0 2px;
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 700;
+}
+.faq-item {
+  border: 1px solid #ffffff12;
+  border-radius: 8px;
+  background: #0b152255;
+}
+.faq-item summary {
+  padding: 9px 10px;
+  color: var(--ink);
+  font-size: 11px;
+  cursor: pointer;
+  list-style: none;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "＋"; float: right; color: var(--muted); }
+.faq-item[open] summary::after { content: "−"; }
+.faq-item p {
+  margin: 0;
+  padding: 0 10px 10px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.65;
 }
 @media (min-width: 621px) {
   .mode-picker:has(.mode-button:nth-child(3)) {
