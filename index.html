@@ -21,22 +21,30 @@
 
     <main id="app" class="main-card" aria-live="polite">
       <section id="home-screen" class="screen">
-        <p class="eyebrow">BLINDSPOT: BEFORE THE FLIP</p>
-        <h1>盲點輪廓<br><span>翻面之前</span></h1>
-        <p class="lead">只給你一句話，剩下的由大腦自動補完。<br>在直覺替你寫好劇本之前，先留下第一個答案。</p>
-        <div class="rule-strip"><span>10 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
-        <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
-          <button class="mode-button selected" data-mode="solo" type="button"><b>單人自我測試</b><small>一個人挑戰第一直覺</small></button>
-          <button class="mode-button" data-mode="party" type="button"><b>聚會輪流作答</b><small>2–6 人共用一台裝置</small></button>
+        <div class="home-layout">
+          <figure class="cover-art">
+            <img src="./assets/cover.jpg" alt="盲點輪廓－翻面之前遊戲封面" width="864" height="1152" fetchpriority="high">
+            <figcaption>START THE EXPERIMENT ／ 開始實驗</figcaption>
+          </figure>
+          <div class="home-copy">
+            <p class="eyebrow">BLINDSPOT: BEFORE THE FLIP</p>
+            <h1>盲點輪廓<br><span>翻面之前</span></h1>
+            <p class="lead">只給你一句話，剩下的由大腦自動補完。<br>在直覺替你寫好劇本之前，先留下第一個答案。</p>
+            <div class="rule-strip"><span>10 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
+            <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
+              <button class="mode-button selected" data-mode="solo" type="button"><b>單人自我測試</b><small>一個人挑戰第一直覺</small></button>
+              <button class="mode-button" data-mode="party" type="button"><b>聚會輪流作答</b><small>2–6 人共用一台裝置</small></button>
+            </div>
+            <div id="party-setup" class="party-setup" hidden>
+              <label for="player-count">玩家人數</label>
+              <select id="player-count" aria-label="玩家人數"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+              <div id="player-names" class="player-names"></div>
+              <p class="helper">每位玩家輪流作答；答案會在大家都鎖定後一起揭曉。</p>
+            </div>
+            <button id="start-button" class="button button-primary button-wide" type="button">開始第一題 <span aria-hidden="true">→</span></button>
+            <p id="question-count" class="small-note">正在讀取題庫…</p>
+          </div>
         </div>
-        <div id="party-setup" class="party-setup" hidden>
-          <label for="player-count">玩家人數</label>
-          <select id="player-count" aria-label="玩家人數"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
-          <div id="player-names" class="player-names"></div>
-          <p class="helper">每位玩家輪流作答；答案會在大家都鎖定後一起揭曉。</p>
-        </div>
-        <button id="start-button" class="button button-primary button-wide" type="button">開始第一題 <span aria-hidden="true">→</span></button>
-        <p id="question-count" class="small-note">正在讀取題庫…</p>
       </section>
 
       <section id="play-screen" class="screen" hidden>
