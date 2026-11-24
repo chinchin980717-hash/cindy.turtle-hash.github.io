@@ -15,20 +15,31 @@
 <body>
   <div class="app-shell">
     <header class="site-header">
-      <a class="wordmark" href="#home" aria-label="返回首頁"><span class="brand-mark">B/F</span><span>認知反轉實驗室</span></a>
+      <a id="home-link" class="wordmark" href="#cover" aria-label="返回封面首頁"><span class="brand-mark">B/F</span><span>認知反轉實驗室</span></a>
       <span class="edition">盲點輪廓　／　翻面之前</span>
     </header>
 
     <main id="app" class="main-card" aria-live="polite">
-      <section id="home-screen" class="screen">
-        <div class="home-layout">
-          <figure class="cover-art">
+      <section id="cover-screen" class="screen cover-screen">
+        <div class="cover-page">
+          <figure class="cover-art cover-art-large">
             <img src="./assets/cover.webp" alt="盲點輪廓－翻面之前遊戲封面" width="864" height="1152" fetchpriority="high">
-            <figcaption>START THE EXPERIMENT ／ 開始實驗</figcaption>
           </figure>
-          <div class="home-copy">
+          <div class="cover-page-copy">
             <p class="eyebrow">BLINDSPOT: BEFORE THE FLIP</p>
             <h1>盲點輪廓<br><span>翻面之前</span></h1>
+            <p class="lead">在直覺替你寫好劇本之前，先留下第一個答案。</p>
+            <button id="enter-game-button" class="button button-primary button-wide" type="button">進入遊戲 <span aria-hidden="true">→</span></button>
+            <p class="cover-note">30 秒作答　／　三層視角提示　／　翻面看真相</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="home-screen" class="screen" hidden>
+        <div class="home-layout">
+          <div class="home-copy">
+            <p class="eyebrow">START THE EXPERIMENT ／ 開始實驗</p>
+            <h1>準備好看見<br><span>第一直覺了嗎？</span></h1>
             <p class="lead">只給你一句話，剩下的由大腦自動補完。<br>在直覺替你寫好劇本之前，先留下第一個答案。</p>
             <div class="rule-strip"><span>30 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
             <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
@@ -41,7 +52,7 @@
               <div id="player-names" class="player-names"></div>
               <p class="helper">每位玩家輪流作答；答案會在大家都鎖定後一起揭曉。</p>
             </div>
-            <button id="start-button" class="button button-primary button-wide" type="button">開始第一題 <span aria-hidden="true">→</span></button>
+            <button id="start-button" class="button button-primary button-wide" type="button">開始玩 <span aria-hidden="true">→</span></button>
             <p id="question-count" class="small-note">正在讀取題庫…</p>
           </div>
         </div>

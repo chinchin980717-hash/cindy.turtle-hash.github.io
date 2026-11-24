@@ -2,7 +2,7 @@ const DATA_URL = new URL("./data/questions.json", import.meta.url);
 const ROUND_SECONDS = 30;
 const MAX_HINTS = 3;
 const $ = (id) => document.getElementById(id);
-const screens = ["home-screen", "play-screen", "locked-screen", "reveal-screen", "end-screen", "error-screen"];
+const screens = ["cover-screen", "home-screen", "play-screen", "locked-screen", "reveal-screen", "end-screen", "error-screen"];
 
 const state = {
   questions: [], mode: "solo", players: [], questionIndex: 0,
@@ -33,6 +33,11 @@ function currentQuestion() { return state.questions[state.questionIndex]; }
 function showScreen(id) {
   screens.forEach((screen) => { $(screen).hidden = screen !== id; });
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function showCover() {
+  clearInterval(state.timer);
+  showScreen("cover-screen");
+  history.replaceState(null, "", "#cover");
 }
 function safeText(node, text) { node.textContent = text ?? ""; }
 function notify(message) {
@@ -74,6 +79,14 @@ function renderPlayerNames() {
   }
 }
 function configureHome() {
+  $("enter-game-button").addEventListener("click", () => {
+    showScreen("home-screen");
+    history.replaceState(null, "", "#home");
+  });
+  $("home-link").addEventListener("click", (event) => {
+    event.preventDefault();
+    showCover();
+  });
   document.querySelectorAll(".mode-button").forEach((button) => button.addEventListener("click", () => {
     state.mode = button.dataset.mode;
     document.querySelectorAll(".mode-button").forEach((candidate) => candidate.classList.toggle("selected", candidate === button));
@@ -103,6 +116,7 @@ function startGame() {
   if (state.mode === "party") {
     state.players = [...$("player-names").querySelectorAll("input")].map((input, index) => ({ name: input.value.trim() || `玩家 ${index + 1}`, score: 0 }));
   } else state.players = [{ name: "你", score: 0 }];
+  history.replaceState(null, "", "#play");
   showTurn();
 }
 function showTurn() {
@@ -306,4 +320,5 @@ function voiceInput() {
 
 configureHome();
 $("start-button").disabled = true;
+showScreen("cover-screen");
 loadQuestions();

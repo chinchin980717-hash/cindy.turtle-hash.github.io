@@ -723,3 +723,72 @@ body::before {
     transition: none !important;
   }
 }
+
+/* Standalone cover page: cover -> menu -> game */
+.cover-screen {
+  min-height: min(620px, calc(100dvh - 150px));
+  display: grid;
+  place-items: center;
+}
+
+.cover-page {
+  display: grid;
+  grid-template-columns: minmax(220px, 330px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(30px, 7vw, 78px);
+  width: min(100%, 700px);
+}
+
+.cover-art-large {
+  width: min(100%, 330px);
+  transform: rotate(-2deg);
+}
+
+.cover-page-copy h1 {
+  margin: 18px 0 16px;
+  font-size: clamp(38px, 6vw, 58px);
+  line-height: 1.18;
+}
+
+.cover-page-copy .lead {
+  margin-bottom: 24px;
+}
+
+.cover-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font: 10px 'DM Mono', monospace;
+  letter-spacing: .04em;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  .cover-screen {
+    min-height: calc(100dvh - 112px);
+  }
+
+  .cover-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .cover-art-large {
+    width: min(68vw, 270px);
+  }
+
+  .cover-page-copy .lead {
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .cover-art-large {
+    width: min(62vw, 220px);
+  }
+
+  .cover-page-copy h1 {
+    font-size: 34px;
+  }
+}
