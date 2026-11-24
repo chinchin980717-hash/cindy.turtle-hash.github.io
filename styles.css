@@ -1048,6 +1048,9 @@ body:not(.cover-mode) {
   gap: 10px;
   margin: 0 0 18px;
 }
+@media (min-width: 481px) {
+  .game-settings { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 
 .setting-field {
   display: grid;
@@ -1104,7 +1107,49 @@ body:not(.cover-mode) {
   background: var(--surface2);
   color: var(--ink);
 }
-
+.how-to-play {
+  margin: 0 0 18px;
+  border: 1px solid #c69a5b44;
+  border-radius: 12px;
+  background: #c69a5b08;
+}
+.how-to-play summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px;
+  color: var(--teal);
+  font-size: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.how-to-play summary::-webkit-details-marker { display: none; }
+.how-to-play summary::after { content: "＋"; color: var(--accent); font-size: 17px; }
+.how-to-play[open] summary::after { content: "−"; }
+.how-to-play summary small { color: var(--muted); font-size: 10px; }
+.how-to-play-body {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+.how-step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 9px;
+  align-items: start;
+  padding-top: 10px;
+  border-top: 1px solid #ffffff0d;
+}
+.how-step>b { color: var(--accent); font: 500 11px 'DM Mono', monospace; }
+.how-step p, .how-online-note { margin: 0; font-size: 11px; line-height: 1.65; }
+.how-step strong, .how-online-note strong { display: block; color: var(--ink); font-size: 12px; }
+.how-step span, .how-online-note span { display: block; color: var(--muted); }
+.how-online-note {
+  padding: 11px 12px;
+  border-left: 2px solid var(--accent);
+  background: #f1b65f0b;
+}
 @media (min-width: 621px) {
   .mode-picker:has(.mode-button:nth-child(3)) {
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="盲點輪廓－翻面之前：30 秒認知反轉心理實驗遊戲">
+  <meta name="description" content="盲點輪廓－翻面之前：可自由選擇答題時間的認知反轉心理實驗遊戲">
   <title>盲點輪廓－翻面之前</title>
   <link rel="stylesheet" href="./styles.css">
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -37,12 +37,21 @@
             <p class="eyebrow">START THE EXPERIMENT ／ 開始實驗</p>
             <h1>準備好看見<br><span>第一直覺了嗎？</span></h1>
             <p class="lead">只給你一句話，剩下的由大腦自動補完。<br>在直覺替你寫好劇本之前，先留下第一個答案。</p>
-            <div class="rule-strip"><span>30 秒作答</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
+            <div class="rule-strip"><span>自由選答題時間</span><i></i><span>三層視角提示</span><i></i><span>翻面看真相</span></div>
             <div class="mode-picker" role="group" aria-label="選擇遊戲模式">
               <button class="mode-button selected" data-mode="solo" type="button"><b>單人自我測試</b><small>一個人挑戰第一直覺</small></button>
               <button class="mode-button" data-mode="party" type="button"><b>聚會輪流作答</b><small>2–6 人共用一台裝置</small></button>
               <button class="mode-button" data-mode="online" type="button"><b>線上房間實驗版</b><small>各自手機連線同樂</small></button>
             </div>
+            <details class="how-to-play">
+              <summary><span>第一次玩？先看玩法說明</span><small>不用猜怎麼開始</small></summary>
+              <div class="how-to-play-body">
+                <div class="how-step"><b>01</b><p><strong>選一種玩法</strong><span>單人自己玩；聚會模式共用一台裝置；線上房間則各自用手機加入。</span></p></div>
+                <div class="how-step"><b>02</b><p><strong>看盲點句，留下第一直覺</strong><span>每題可以自由選擇答題時間，也能選「不計時」。可以輸入答案或解鎖提示，但先不要急著翻面。</span></p></div>
+                <div class="how-step"><b>03</b><p><strong>鎖定答案，再看真相</strong><span>答案送出後不能重填；揭曉時會看到完整情境、解析與 0／1／2 分輔助判分。</span></p></div>
+                <div class="how-online-note"><strong>線上房間怎麼玩？</strong><span>房主按「建立房間」並分享 6 位代碼；朋友選「加入房間」輸入代碼。等大家連上後，房主按「開始這局」。之後每個人各自在自己的裝置作答，房主負責揭曉與進入下一題。</span></div>
+              </div>
+            </details>
             <div id="online-setup" class="online-setup" hidden>
               <div class="online-fields">
                 <label class="setting-field" for="online-name"><span>你的暱稱</span><input id="online-name" maxlength="18" value="玩家" autocomplete="nickname"></label>
@@ -54,6 +63,7 @@
             <div class="game-settings" aria-label="遊戲設定">
               <label class="setting-field" for="round-count"><span>遊戲局數</span><select id="round-count"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option><option value="all">全部題目</option></select></label>
               <label class="setting-field" for="category-select"><span>題目分類</span><select id="category-select"><option value="all">全部分類</option></select></label>
+              <label class="setting-field" for="answer-time"><span>答題時間</span><select id="answer-time"><option value="30" selected>30 秒</option><option value="60">60 秒</option><option value="90">90 秒</option><option value="unlimited">不計時</option></select></label>
             </div>
             <div id="party-setup" class="party-setup" hidden>
               <label for="player-count">玩家人數</label>
@@ -73,8 +83,8 @@
         <div class="player-banner"><span id="active-player"></span><span id="turn-status" class="small-note"></span></div>
         <p class="section-label">盲點句 <span>／只看輪廓</span></p>
         <article id="blind-card" class="blind-card"><div class="card-face"><p id="blind-line"></p></div><div class="card-back"><p id="revealed-context"></p></div></article>
-        <div class="timer-row"><span>翻面倒數</span><strong id="timer-value">30</strong></div>
-        <div class="timer-track"><span id="timer-bar"></span></div>
+        <div id="timer-row" class="timer-row"><span>翻面倒數</span><strong id="timer-value">30</strong></div>
+        <div id="timer-track" class="timer-track"><span id="timer-bar"></span></div>
         <label class="answer-label" for="answer-input">你的第一直覺是？</label>
         <div class="answer-row"><input id="answer-input" maxlength="180" autocomplete="off" placeholder="輸入答案，或使用語音輸入…"><button id="voice-button" class="button button-quiet voice-button" type="button" aria-label="語音輸入" title="語音輸入">語音</button></div>
         <p id="voice-status" class="helper" aria-live="polite"></p>

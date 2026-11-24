@@ -7,8 +7,8 @@ const screens = ["cover-screen", "home-screen", "play-screen", "locked-screen", 
 const state = {
   questions: [], playlist: [], mode: "solo", players: [], questionIndex: 0,
   playerIndex: 0, answers: [], hintIndex: 0, timer: null,
-  seconds: ROUND_SECONDS, startedAt: 0, answering: false,
-  online: { peer: null, connection: null, connections: new Map(), role: null, code: "", name: "", ready: false, players: [], answers: new Map(), round: 0, total: 0 }
+  seconds: ROUND_SECONDS, timeLimit: ROUND_SECONDS, startedAt: 0, answering: false,
+  online: { peer: null, connection: null, connections: new Map(), role: null, code: "", name: "", ready: false, players: [], answers: new Map(), round: 0, total: 0, timeLimit: ROUND_SECONDS }
 };
 
 const defaultL3 = "試著比較兩種相反情境：最符合表面直覺的是什麼？若把動機完全反過來，哪個合理情況也符合句中明確事實？";
@@ -53,6 +53,11 @@ function escapeText(value) { return String(value ?? ""); }
 
 function onlineStatus(message) { safeText($("online-status"), message); }
 function onlineName() { return $("online-name").value.trim().slice(0, 18) || "玩家"; }
+function selectedTimeLimit() {
+  const value = $("answer-time").value;
+  return value === "unlimited" ? null : Number(value);
+}
+function timeLimitLabel() { return state.timeLimit === null ? "不計時" : `${state.timeLimit} 秒`; }
 function makeRoomCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
 function onlinePlayers() {
   const scores = new Map(state.players.map((player) => [player.id, player.score || 0]));
@@ -66,7 +71,7 @@ function resetOnline() {
   state.online.connections.forEach((connection) => connection.close());
   state.online.connection?.close();
   state.online.peer?.destroy();
-  state.online = { peer: null, connection: null, connections: new Map(), role: null, code: "", name: "", ready: false, players: [], answers: new Map(), round: 0, total: 0 };
+  state.online = { peer: null, connection: null, connections: new Map(), role: null, code: "", name: "", ready: false, players: [], answers: new Map(), round: 0, total: 0, timeLimit: ROUND_SECONDS };
 }
 function setupOnlineHost() {
   if (!window.Peer) { onlineStatus("PeerJS 載入失敗，請改用單人或同裝置模式。"); return; }
@@ -119,6 +124,8 @@ function setupOnlineGuest() {
 function startOnlineGame() {
   buildPlaylist();
   if (!state.playlist.length) { onlineStatus("這個分類目前沒有可玩的題目。"); return; }
+  state.online.timeLimit = selectedTimeLimit();
+  state.timeLimit = state.online.timeLimit;
   state.online.players = onlinePlayers();
   state.players = state.online.players;
   state.questionIndex = 0;
@@ -134,10 +141,11 @@ function startOnlineRound() {
   state.online.round = state.questionIndex + 1;
   state.online.answers = new Map();
   state.answers = [];
+  state.timeLimit = state.online.timeLimit;
   state.online.players = onlinePlayers();
   state.players = state.online.players;
   const question = state.playlist[state.questionIndex];
-  sendOnline({ type: "question", question, round: state.online.round, total: state.online.total, players: state.players });
+  sendOnline({ type: "question", question, round: state.online.round, total: state.online.total, timeLimit: state.online.timeLimit, players: state.players });
   showTurn();
 }
 function handleOnlineJoin(message, connection) {
@@ -207,6 +215,8 @@ function handleOnlineMessage(message, connection) {
     state.questionIndex = 0;
     state.online.round = message.round;
     state.online.total = message.total;
+    state.online.timeLimit = message.timeLimit === undefined ? ROUND_SECONDS : message.timeLimit;
+    state.timeLimit = state.online.timeLimit;
     showTurn();
     return;
   }
@@ -261,7 +271,8 @@ function updateGameSettingsNote() {
   const category = $("category-select").value;
   const available = state.questions.filter((question) => category === "all" || question.category === category).length;
   const requested = $("round-count").value === "all" ? available : Number($("round-count").value);
-  safeText($("question-count"), `可選題目：${available} 題，本局將遊玩 ${Math.min(requested, available)} 題`);
+  const selected = $("answer-time").value === "unlimited" ? "不計時" : `${$("answer-time").value} 秒`;
+  safeText($("question-count"), `可選題目：${available} 題，本局將遊玩 ${Math.min(requested, available)} 題；每題${selected}`);
 }
 
 function buildPlaylist() {
@@ -302,8 +313,13 @@ function configureHome() {
   $("player-count").addEventListener("change", renderPlayerNames);
   $("round-count").addEventListener("change", updateGameSettingsNote);
   $("category-select").addEventListener("change", updateGameSettingsNote);
+  $("answer-time").addEventListener("change", updateGameSettingsNote);
   $("online-role").addEventListener("change", () => {
     $("room-code-field").hidden = $("online-role").value !== "guest";
+    const isGuest = $("online-role").value === "guest";
+    $("round-count").disabled = isGuest;
+    $("category-select").disabled = isGuest;
+    $("answer-time").disabled = isGuest;
     onlineStatus($("online-role").value === "guest" ? "輸入房主提供的 6 位代碼。" : "建立房間後把代碼分享給朋友。");
     $("start-button").textContent = $("online-role").value === "guest" ? "加入房間 →" : "建立房間 →";
   });
@@ -330,6 +346,7 @@ function startGame() {
   clearInterval(state.timer);
   buildPlaylist();
   if (!state.playlist.length) { notify("這個分類目前沒有可玩的題目。"); return; }
+  state.timeLimit = selectedTimeLimit();
   state.questionIndex = 0;
   state.playerIndex = 0;
   state.answers = [];
@@ -346,7 +363,7 @@ function showTurn() {
   state.answers = [];
   state.hintIndex = 0;
   state.playerIndex = 0;
-  state.seconds = ROUND_SECONDS;
+  state.seconds = state.timeLimit;
   safeText($("question-meta"), `${q.id ?? String(state.questionIndex + 1).padStart(3, "0")}　／　${q.category ?? "未分類"}`);
   safeText($("round-progress"), "");
   const totalRounds = state.mode === "online" ? state.online.total : state.playlist.length;
@@ -376,19 +393,29 @@ function renderActivePlayer() {
 }
 function startTimer() {
   clearInterval(state.timer);
-  state.seconds = ROUND_SECONDS;
+  const timerRow = $("timer-row");
+  const timerTrack = $("timer-track");
+  const unlimited = state.timeLimit === null;
+  timerRow.hidden = unlimited;
+  timerTrack.hidden = unlimited;
+  if (unlimited) {
+    state.seconds = null;
+    return;
+  }
+  state.seconds = state.timeLimit;
   state.startedAt = Date.now();
   renderTimer();
   state.timer = setInterval(() => {
-    state.seconds = Math.max(0, ROUND_SECONDS - (Date.now() - state.startedAt) / 1000);
+    state.seconds = Math.max(0, state.timeLimit - (Date.now() - state.startedAt) / 1000);
     renderTimer();
     if (state.seconds <= 0) lockAnswer(true);
   }, 100);
 }
 function renderTimer() {
+  if (state.timeLimit === null) return;
   const whole = Math.ceil(state.seconds);
   safeText($("timer-value"), String(whole).padStart(2, "0"));
-  $("timer-bar").style.width = `${(state.seconds / ROUND_SECONDS) * 100}%`;
+  $("timer-bar").style.width = `${(state.seconds / state.timeLimit) * 100}%`;
   $("timer-bar").classList.toggle("urgent", state.seconds <= 3);
 }
 function unlockHint() {
@@ -425,7 +452,7 @@ function lockAnswer(timedOut, skipped = false) {
   $("locked-quote").hidden = state.mode === "party" && hasNext;
   safeText($("locked-title"), skipped ? "本題已略過。" : (timedOut && !raw ? "時間到，答案已鎖定。" : "答案已鎖定，先別急著翻面。"));
   safeText($("locked-copy"), skipped ? "這題不計入直覺判定，準備繼續下一題。" : (hasNext ? "答案先保留，請把裝置交給下一位玩家。" : "第一直覺已經記下來，現在一起看看大腦補上了什麼。"));
-  safeText($("locked-next-note"), hasNext ? "下一位玩家有自己的 30 秒；前面鎖定的答案會暫時隱藏。" : `${state.players.length} 位玩家都已鎖定答案。`);
+  safeText($("locked-next-note"), hasNext ? `下一位玩家有自己的${timeLimitLabel()}；前面鎖定的答案會暫時隱藏。` : `${state.players.length} 位玩家都已鎖定答案。`);
   $("next-player-button").hidden = !hasNext;
   $("reveal-button").hidden = hasNext;
   showScreen("locked-screen");
