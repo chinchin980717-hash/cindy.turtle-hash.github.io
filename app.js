@@ -32,6 +32,7 @@ function questionHints(question) {
 function currentQuestion() { return state.questions[state.questionIndex]; }
 function showScreen(id) {
   screens.forEach((screen) => { $(screen).hidden = screen !== id; });
+  document.body.classList.toggle("cover-mode", id === "cover-screen");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function showCover() {

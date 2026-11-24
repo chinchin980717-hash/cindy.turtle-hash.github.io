@@ -846,3 +846,77 @@ body::before {
     width: min(100%, 300px);
   }
 }
+
+/* Cover mode is intentionally image-only and fills the viewport. */
+body.cover-mode {
+  overflow: hidden;
+  background: #000;
+}
+
+body.cover-mode::before,
+body.cover-mode .main-card::before {
+  display: none;
+}
+
+body.cover-mode .site-header,
+body.cover-mode footer,
+body.cover-mode .toast {
+  display: none;
+}
+
+body.cover-mode .app-shell,
+body.cover-mode .main-card {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body.cover-mode .main-card {
+  min-height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+}
+
+body.cover-mode .cover-screen {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 0;
+}
+
+body.cover-mode .cover-page {
+  width: 100vw;
+  height: 100dvh;
+  gap: 0;
+}
+
+body.cover-mode .cover-art-large {
+  width: 100vw;
+  height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+}
+
+body.cover-mode .cover-art-large::before,
+body.cover-mode .cover-art-large::after {
+  display: none;
+}
+
+body.cover-mode .cover-image-button,
+body.cover-mode .cover-image-button img {
+  width: 100vw;
+  height: 100dvh;
+}
+
+body.cover-mode .cover-image-button img {
+  display: block;
+  object-fit: contain;
+}
+
+body.cover-mode .cover-image-button:not(:disabled):hover img {
+  filter: none;
+}
