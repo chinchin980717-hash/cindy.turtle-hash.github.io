@@ -5,7 +5,7 @@ const $ = (id) => document.getElementById(id);
 const screens = ["cover-screen", "home-screen", "play-screen", "locked-screen", "reveal-screen", "end-screen", "error-screen"];
 
 const state = {
-  questions: [], mode: "solo", players: [], questionIndex: 0,
+  questions: [], playlist: [], mode: "solo", players: [], questionIndex: 0,
   playerIndex: 0, answers: [], hintIndex: 0, timer: null,
   seconds: ROUND_SECONDS, startedAt: 0, answering: false
 };
@@ -29,7 +29,7 @@ function questionHints(question) {
   while (hints.length < 3) hints.push(hints.length === 2 ? defaultL3 : "換一個情緒、動機或情境角度，再看一次句子裡明確提供的線索。");
   return hints.slice(0, MAX_HINTS);
 }
-function currentQuestion() { return state.questions[state.questionIndex]; }
+function currentQuestion() { return state.playlist[state.questionIndex]; }
 function showScreen(id) {
   screens.forEach((screen) => { $(screen).hidden = screen !== id; });
   document.body.classList.toggle("cover-mode", id === "cover-screen");
@@ -58,7 +58,8 @@ async function loadQuestions() {
     const list = Array.isArray(data) ? data : data.questions;
     state.questions = (list ?? []).filter((q) => q && q.id !== "000" && q.blind_spot_line);
     if (!state.questions.length) throw new Error("沒有可遊玩的題目");
-    safeText($("question-count"), `目前題庫：${state.questions.length} 題`);
+    populateCategories();
+    updateGameSettingsNote();
     safeText($("footer-question-count"), `${state.questions.length} 題可玩`);
     $("start-button").disabled = false;
     $("enter-game-button").disabled = false;
@@ -68,6 +69,29 @@ async function loadQuestions() {
     $("enter-game-button").disabled = true;
     showScreen("error-screen");
   }
+}
+
+function populateCategories() {
+  const select = $("category-select");
+  const categories = [...new Set(state.questions.map((question) => question.category).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "zh-Hant"));
+  select.replaceChildren(new Option("全部分類", "all"));
+  categories.forEach((category) => select.add(new Option(category, category)));
+}
+
+function updateGameSettingsNote() {
+  const category = $("category-select").value;
+  const available = state.questions.filter((question) => category === "all" || question.category === category).length;
+  const requested = $("round-count").value === "all" ? available : Number($("round-count").value);
+  safeText($("question-count"), `可選題目：${available} 題，本局將遊玩 ${Math.min(requested, available)} 題`);
+}
+
+function buildPlaylist() {
+  const category = $("category-select").value;
+  const pool = state.questions.filter((question) => category === "all" || question.category === category);
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const requested = $("round-count").value === "all" ? shuffled.length : Number($("round-count").value);
+  state.playlist = shuffled.slice(0, Math.min(requested, shuffled.length));
 }
 
 function renderPlayerNames() {
@@ -83,7 +107,8 @@ function renderPlayerNames() {
 }
 function configureHome() {
   $("enter-game-button").addEventListener("click", () => {
-    startGame();
+    showScreen("home-screen");
+    history.replaceState(null, "", "#setup");
   });
   $("home-link").addEventListener("click", (event) => {
     event.preventDefault();
@@ -95,6 +120,8 @@ function configureHome() {
     $("party-setup").hidden = state.mode !== "party";
   }));
   $("player-count").addEventListener("change", renderPlayerNames);
+  $("round-count").addEventListener("change", updateGameSettingsNote);
+  $("category-select").addEventListener("change", updateGameSettingsNote);
   renderPlayerNames();
   $("start-button").addEventListener("click", startGame);
   $("lock-button").addEventListener("click", () => lockAnswer(false));
@@ -112,6 +139,8 @@ function configureHome() {
 
 function startGame() {
   clearInterval(state.timer);
+  buildPlaylist();
+  if (!state.playlist.length) { notify("這個分類目前沒有可玩的題目。"); return; }
   state.questionIndex = 0;
   state.playerIndex = 0;
   state.answers = [];
@@ -123,7 +152,7 @@ function startGame() {
 }
 function showTurn() {
   clearInterval(state.timer);
-  if (state.questionIndex >= state.questions.length) { showEnd(); return; }
+  if (state.questionIndex >= state.playlist.length) { showEnd(); return; }
   const q = currentQuestion();
   state.answers = [];
   state.hintIndex = 0;
@@ -131,7 +160,7 @@ function showTurn() {
   state.seconds = ROUND_SECONDS;
   safeText($("question-meta"), `${q.id ?? String(state.questionIndex + 1).padStart(3, "0")}　／　${q.category ?? "未分類"}`);
   safeText($("round-progress"), "");
-  $("round-progress").style.width = `${((state.questionIndex + 1) / state.questions.length) * 100}%`;
+  $("round-progress").style.width = `${((state.questionIndex + 1) / state.playlist.length) * 100}%`;
   safeText($("blind-line"), q.blind_spot_line);
   safeText($("revealed-context"), "準備翻面揭曉…");
   $("blind-card").classList.remove("flipped");
@@ -277,7 +306,7 @@ function renderScores() {
     player.score += result.score - result.appliedScore;
     result.appliedScore = result.score;
   });
-  safeText($("continue-button"), state.questionIndex === state.questions.length - 1 ? "查看總結 →" : "下一題 →");
+  safeText($("continue-button"), state.questionIndex === state.playlist.length - 1 ? "查看總結 →" : "下一題 →");
 }
 function nextQuestion() {
   state.questionIndex += 1;
